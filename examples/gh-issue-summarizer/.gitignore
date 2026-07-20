@@ -1,0 +1,23 @@
+# === examples 项目级 .gitignore ===
+# 因为 examples 是教学示例，目录里混着 SPEC 资产（要跟 git）+ 演示产物（不跟 git）
+
+# 演示产物：不进 git
+runs/*-dry/
+runs/*-run.log
+runs/fallback/
+
+# SPEC 资产：保持跟踪（不要进 gitignore）
+# !runs/timeline.txt
+# !runs/<date>/run.log
+
+# 本地配置副本（保留 schema 文件，不进本地实际凭证）
+configs/*.local.yaml
+configs/*.local.json
+
+# binaries
+bin/
+
+# Go build 产物
+*.exe
+*.test
+*.out

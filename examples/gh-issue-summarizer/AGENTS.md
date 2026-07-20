@@ -28,7 +28,9 @@
    # 没读：会无意触发 LLM 调用（每次都花钱）
 4. **看 `runs/timeline.txt` 最近 30 行** —— 知道上周发生了什么 / 哪里在卡
    # 没看：会重做别人已修过的 bug（spec §3 BUG-N 都列了）
-5. **确认当前唯一进行中的任务**（见 `PROJECT_WIKI/overview.md` 的"正在做"）
+5. **跑 `make doctor`** —— 验证 3 个 API + 配置 schema + env vars 联通
+   # 没跑：会跳进未验证环境，改完发现凭证失效
+6. **确认当前唯一进行中的任务**（见 `PROJECT_WIKI/overview.md` 的"正在做"）
    # 没确认：会让 AI 同时推进多任务 = 跑飞
 
 ## §2 别动什么

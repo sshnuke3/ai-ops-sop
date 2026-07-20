@@ -225,6 +225,7 @@ main.RunOnce(repos) [每个 repo 一遍]
 - 时间线：`runs/timeline.txt`
 - Prompt 资产：`prompts/`
 - 配置（不属 SOP 范围）：`configs/*.yaml.example`
+- 命令入口：`commands/Makefile`（8 个 target）
 - SOP 主文档：`../../README.md`
 
 ---

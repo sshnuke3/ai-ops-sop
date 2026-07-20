@@ -21,6 +21,7 @@
 gh-issue-summarizer/
 ├── README.md                  ← 项目自己的入口
 ├── AGENTS.md                  ← AI 接力起点（对应 SOP §6 spec.md §0）
+├── .gitignore                 ← examples 项目级忽略（演示产物不跟 git）
 ├── PROJECT_WIKI/
 │   ├── overview.md            ← SOP §2 L1 总览（≤5KB）
 │   └── .agent-rules           ← AI 自动化动作约束补充（OpenClaw 风格）
@@ -40,6 +41,10 @@ gh-issue-summarizer/
 │   ├── summary_v3.txt           （当前主用 prompt）
 │   ├── summary_v3.txt.sha256   （hash sidecar，sha256sum -c 验证）
 │   └── summary_v2.txt           （已弃用 — DEP-N 反例）
+├── commands/                  ← 命令入口（闭合文档-命令断链）
+│   ├── Makefile                 （8 个 target 定义）
+│   ├── README.md                （target 速查 + 设计原则）
+│   └── scripts/run-once-dry.sh  （干跑脚本 demo）
 ```
 
 每份文件都**完全填好**，且带**"为什么这样填"的设计注释**——读完会知道 SOP 的每条规则是怎么落到具体文件里的。

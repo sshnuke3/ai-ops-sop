@@ -99,11 +99,11 @@ output_constraints:
 
 ci_hooks:
   pre_commit:
-    - "make doctor"          # 3 个 API 联通
-    - "go test ./..."        # 编译/测试
-    - "yamllint configs/*.yaml.example"
+    - "make doctor"          # 3 个 API 联通（see commands/Makefile）
+    - "make test"            # 编译/测试
+    - "make lint-config"     # yamllint configs/*.yaml.example
   pre_push:
-    - "go test ./... -race -count=2"
+    - "make test-strict"     # go test ./... -race -count=2
     - "make run-once-dry"    # dry-run，**不真写 Notion / 不真调 LLM**
 
 # === 维护说明 ===
