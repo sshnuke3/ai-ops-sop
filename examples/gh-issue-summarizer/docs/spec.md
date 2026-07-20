@@ -217,10 +217,13 @@ main.RunOnce(repos) [每个 repo 一遍]
 
 ## §7 链接到其他资产
 
+- AI 接力入口：`AGENTS.md`
+- 自动化动作约束：`PROJECT_WIKI/.agent-rules`
 - 项目总览：`PROJECT_WIKI/overview.md`
 - 红线配置：`red_lines.yaml`
 - 任务台账：`tasks/`
 - 时间线：`runs/timeline.txt`
+- Prompt 资产：`prompts/`
 - 配置（不属 SOP 范围）：`configs/*.yaml.example`
 - SOP 主文档：`../../README.md`
 

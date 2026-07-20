@@ -19,9 +19,11 @@
 
 ```
 gh-issue-summarizer/
-├── README.md                  ← 你正在读的（项目入口）
+├── README.md                  ← 项目自己的入口
+├── AGENTS.md                  ← AI 接力起点（对应 SOP §6 spec.md §0）
 ├── PROJECT_WIKI/
-│   └── overview.md            ← SOP §2 L1 总览（≤5KB）
+│   ├── overview.md            ← SOP §2 L1 总览（≤5KB）
+│   └── .agent-rules           ← AI 自动化动作约束补充（OpenClaw 风格）
 ├── docs/
 │   └── spec.md                ← SOP §6 项目总规（§0-§6）
 ├── red_lines.yaml             ← SOP §4 红线系统（启用 5 + 加 2 条）

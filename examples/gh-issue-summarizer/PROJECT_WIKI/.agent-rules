@@ -1,0 +1,119 @@
+# .agent-rules —— gh-issue-summarizer 的"机器读规则"补充
+# 这是 AGENTS.md 之后的第 2 份文件，给 AI 的"自动化"部分用
+# 跟 AGENTS.md 的关系：AGENTS.md 是"AI 醒了该读什么"，本文件是"AI 自动化怎么动作"
+
+# === 路由规则 ===
+# AI 接手任何会话，OpenClaw 习惯是按以下顺序加载：
+#   1. ../../AGENTS.md（本项目根的 AGENTS.md）—— 必读
+#   2. ./PROJECT_WIKI/.agent-rules（本文件）—— 接力读完 AGENTS.md 后再读
+#   3. ./PROJECT_WIKI/overview.md —— L1 总览
+#   4. ./docs/spec.md §0-§3 —— 项目规约
+#
+# 简而言之：AGENTS.md 讲"我是谁要干嘛"，本文件讲"动作约束"
+
+# === 加载动作约束 ===
+
+# 1. 任何"实现"阶段的代码改动前
+must_read_before_implement:
+  - path: "docs/spec.md"
+    section: "§3 不变式"
+  - path: "red_lines.yaml"
+    section: "load_policy.on_stage_enter.implement"
+  - path: "prompts/README.md"
+    section: "5 件套清单（改 prompt 时）"
+
+# 2. 任何"提交 / 推送"前
+must_read_before_commit:
+  - path: "AGENTS.md"
+    section: "§5 跑完 / 提交时 · 5 件沉淀动作"
+  - path: "docs/spec.md"
+    section: "§5 产物清单 + §8 维护说明"
+
+# 3. 任何"跑一次"前（cron 或手动）
+must_read_before_run:
+  - path: "red_lines.yaml"
+    section: "load_policy.on_session_start"
+  - path: "configs/llm.yaml.example"
+    section: "max_total_tokens_per_run"
+
+# === 加载模式 ===
+
+loading_mode:
+  critical_only_at_start: [RL-15, RL-16, RL-31, RL-32, RL-40, RL-PRJ-1]
+  load_on_stage:
+    config: [RL-60, RL-50]
+    fetch: [RL-50]
+    rank: []
+    summarize: [RL-PRJ-1, RL-50]
+    write: [RL-PRJ-2, RL-31]
+    fallback: [RL-31, RL-40]
+    publish: [RL-40]
+
+# === 上下文预算自检 ===
+
+context_budget:
+  # 【填法】每类文档的"最多 token 数"——超出就该读更精简版
+  budget:
+    "PROJECT_WIKI/overview.md": 5000   # L1 必须 ≤ 5KB
+    "docs/spec.md": 25000             # §0-§3 必读 ≤ 25KB
+    "red_lines.yaml": 4000
+    "AGENTS.md": 6000
+    "tasks/*.md": 8000
+
+  # 【填法】超出预算时该怎么办
+  overflow_action:
+    overview: "本文件超出 5KB → 拆出 docs/modules/ 子文档"
+    spec: "本文件超出 25KB → 拆出 docs/spec-<module>.md 子规约"
+    red_lines: "本文件超出 4KB → 抽 history 到 separate history.yaml"
+
+# === 接力信号 ===
+
+handoff_signal:
+  # 新会话检测到以下标记之一立刻停止主动动作：
+  triggers:
+    - "# HANDOVER-CONTEXT"           # 上一个会话明确标记交接
+    - "## PREVIOUS-RUN-PARTIAL"      # 上一次未跑完
+    - "## NEEDS-MAINTAINER-DECISION" # 等主人决策
+  actions_on_handoff:
+    - "先读 PROJECT_WIKI/overview.md 当前状态"
+    - "再读 runs/timeline.txt 最近 30 行"
+    - "如上轮有 PARTIAL → 接续 stage M 跑 stage M+1"
+    - "如 NEEDS-DECISION → 等维护者，不自己决策"
+
+# === 输出格式约束 ===
+
+output_constraints:
+  commit_message:
+    required_sections: [type, scope, body, footer]
+    forbidden_patterns:
+      - "^X/Y tests? pass"   # 【为什么禁】v3 mock 谎言的真坑——必须 _test.go 文件真存在才能写
+      - "^WIP$"             # WIP commit 不允许进 main
+    type_enum: [feat, fix, docs, refactor, test, chore]
+
+  on_violation:
+    # AI 触发红线时只能按 red_lines.yaml 的 on_violation 模板汇报
+    # 不准用其他格式、不准"我觉得这个不算"
+    use_red_lines_template: true
+
+# === 自动化 hook（如果项目接入 CI） ===
+
+ci_hooks:
+  pre_commit:
+    - "make doctor"          # 3 个 API 联通
+    - "go test ./..."        # 编译/测试
+    - "yamllint configs/*.yaml.example"
+  pre_push:
+    - "go test ./... -race -count=2"
+    - "make run-once-dry"    # dry-run，**不真写 Notion / 不真调 LLM**
+
+# === 维护说明 ===
+# 1. 修改本文件不需要升版本（不是 prompt / 不是 spec 的一部分）
+# 2. 但修改前确认 AGENTS.md / spec.md 没冲突——本文件只是"自动加载"层
+# 3. 加新约束写到对应 stage 下，不要散落
+# 4. context_budget 是软约束——超 1.2 倍才警告，不要硬卡
+
+# === 本 .agent-rules 示例特意展示的 4 件事 ===
+# 1. 加载路由规则——把 SOP 多个文件按优先级排序，让 AI 不要"乱读"
+# 2. 上下文预算约束——overview.md ≤ 5KB 是来自 SOP，不是本文件创造的
+# 3. 接力信号——HANDOVER-CONTEXT 等是 OpenClaw 风格的"会话交接"模式
+# 4. CI hook——把"流程纪律"延伸到 CI 层，让"忘了做 X"在 push 阶段被拦
