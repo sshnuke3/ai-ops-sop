@@ -367,6 +367,33 @@ red_lines:
 
 ---
 
+## 🤖 多 Agent 进阶
+
+本 SOP 只覆盖单 Agent 跑任务。当场景过需要 N 个 AI 协作（角色分工、上下文共享、群体决策）时，补以下资源：
+
+| 资源 | 覆盖内容 | 起点门槛 |
+|---|---|---|
+| [bojieli/ai-agent-book ch10](https://github.com/bojieli/ai-agent-book) | 多 Agent 协作总论：5 种协作模式 / 4 种上下文传递策略 / 5 大失败模式 / 群体一致性评估 | 读过本 SOP §1-§5 |
+| [anthropic.com/blog/claude-code-subagents](https://www.anthropic.com/blog/claude-code-subagents) | Claude Code 的 sub-agent 机制（生产实现参考） | 本 SOP §1 §2 读过 |
+| [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | LangGraph 多 Agent 编排框架（包含失败重试、人审 in the loop） | 本 SOP §5 验证双闸门 |
+
+### 本 SOP 适用于多 Agent 的部分
+
+- §1 流水线骨架 = 适合做多 Agent 间的"交接协议"
+- §2 三层知识地图 = 在多 Agent 场景下，需要为每个 Agent 定义独立的 L1/L2/L3
+- §4 红线系统 = 适合做 Agent 间互信能力边界
+- §5 验证双闸门 = 多 Agent 场景下需升级为"群体一致性闸门"
+- §6 跨会话知识传承 = 多 Agent 场景下的"集体记忆 vs 个人记忆"划分
+
+### 不适用部分
+
+- §7 硬关卡 HK = 单 Agent 信任模型；多 Agent 需升级为"群体 HK + 互信锁定"
+- §8 5 条普适原则 = 仅适合单 Agent；多 Agent 场景需独立总结“群体原则”（待项目维护者沉淀）
+
+> **本 SOP  不**提供多 Agent 场景的完整 SOP —— 正在 `drafts/multi-agent-sop/RFC.md` 立项调研中。门槛是 3+ 次失败样本，多 agent demo 启动中。
+
+---
+
 ## 📚 延伸阅读
 
 本 SOP 讲"怎么跑"，以下资源讲"为什么这样跑"——读者按兴趣跳读：
