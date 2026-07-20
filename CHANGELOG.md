@@ -11,11 +11,37 @@
 - 真能跑的 examples —— 引入 mock server 让 `make doctor` / `make run-once-dry` 在没有真实凭证情况下也能跑通
 - CONTRIBUTING.md：贡献指南（如何提 PR、如何报 issue）
 
-### Added (post-v0.6.0, not versioned yet)
+## [0.8.0] - 2026-07-21
 
-- 主 README 加“📚 延伸阅读”段 · 指向 bojieli/ai-agent-book · 列出与本 SOP 对应的 4 章映射
-  - 该变更本应记为 v0.7.0，依赖主人评审后在下次 release 时版本化
-  - 背景：主人 2026-07-21 读了《深入理解 AI Agent》 后追加
+### Added
+
+- 主 README 加“🤖 多 Agent 进阶” 段（单 Agent → 多 Agent 场景跳转）
+  - 3 资源指针：bojieli/ai-agent-book ch10 · claude-code-subagents · langgraph
+  - 各资源“起点门槛”列（读完本 SOP 哪些节才能跳）
+  - “本 SOP 适用部分” 清单（§1 交接 / §2 知识地图 / §4 红线 / §5 验证 / §6 记忆）
+  - “不适用部分” 清单（§7 HK / §8 原则）
+  - 明确本 SOP 不提供多 Agent 完整 SOP · 立项门槛 3+ 失败样本 · demo 启动中
+- 1 处脱敏修复：“待项目维护者沉淀”（个人化表述 0 命中）
+
+### Notes
+
+- 本版本是 v0.7.0 的下一步补充，单 Agent → 多 Agent 场景的衔接
+
+## [0.7.0] - 2026-07-21
+
+### Added
+
+- 主 README 加“📚 延伸阅读” 段 · 指向 bojieli/ai-agent-book · 列出与本 SOP 对应的 4 章映射
+  - 互补关系明确：“本 SOP 教怎么跑，《深入理解 AI Agent》 教为什么这样跑”
+  - 4 章映射表：
+    - ch2 上下文工程 ↔ §3 五步定位法 + `load_policy.on_stage_enter`
+    - ch6 Agent 评估 ↔ §5 验证双闸门
+    - ch7 模型后训练 ↔ §7 红线 + §5 验证是为项目补 Harness 不是补模型
+    - ch8 自我进化 ↔ §8 沉淀 + §10 “今天 3 件事”
+
+### Notes
+
+- 背景：2026-07-21 读了《深入理解 AI Agent》 后追加
 
 ## [0.5.0] - 2026-07-21
 

@@ -1,7 +1,7 @@
 # AI 长任务协作 SOP（通用版）
 
-> **版本**：v0.5.0（2026-07-21）｜**许可证**：MIT（见 [LICENSE](./LICENSE)）
-> **状态**：⚠️ **工作进度版**（0.5.x）—— API 不保证稳定，但 docs/examples 不破坏可读性
+> **版本**：v0.8.0（2026-07-21）｜**许可证**：MIT（见 [LICENSE](./LICENSE)）
+> **状态**：⚠️ **工作进度版**（0.8.x）—— API 不保证稳定，但 docs/examples 不破坏可读性
 > **Changelog**：[CHANGELOG.md](./CHANGELOG.md)
 
 > **适用对象**：用 AI Agent / LLM 跑「3 步以上长任务」的个人开发者和 5 人以下小团队。
@@ -14,7 +14,7 @@
 
 ### 这是工作进度版
 
-本仓库当前 **v0.5.0**，按 [Semantic Versioning](https://semver.org/lang/zh-CN/) 惯例 = 仍在开发，可能会有不向后兼容的变更：
+本仓库当前 **v0.8.0**，按 [Semantic Versioning](https://semver.org/lang/zh-CN/) 惯例 = 仍在开发，可能会有不向后兼容的变更：
 
 - ✅ **可用件**：5 份模板 + 1 完整示例项目（gh-issue-summarizer）+ 6 个命令入口
 - ⚠️ **demo 友好件**：`examples/gh-issue-summarizer/` 的 `commands/Makefile` 里部分 target 是 demo 级（仅打印示意，不真调 API）—— **拷走到自己项目时需补实**
