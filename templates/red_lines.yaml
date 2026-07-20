@@ -1,0 +1,148 @@
+# red_lines.yaml
+# AI Agent / LLM 协作的红线配置 · YAML 单源
+# 抄走方式：复制本文件到项目根 → 重命名 → 按需启用/禁用规则
+
+# ===== 元信息 =====
+meta:
+  version: "0.1"
+  description: "AI 长任务协作的标准红线集，按项目需要启用/禁用/扩展"
+  owner: "<你的名字/团队>"
+  last_updated: "YYYY-MM-DD"
+
+# ===== 红线清单 =====
+# 两层分类:
+#   critical = 启动加载（Agent 一启动就读），违反会出线上事故
+#   standard = 按阶段加载（哪阶段用到哪阶段才加载）
+# 触发后 Agent 必须停下 + 按模板汇报，不允许"自我判断违规但不报告"
+
+red_lines:
+
+  # ===== Critical（启动加载）=====
+
+  - id: RL-15
+    level: critical
+    title: "编译/测试必须退出码 0"
+    trigger: "任何'实现完成'声明前"
+    action: "自动跑 <build/test 指令>，以退出码 0 为唯一判据"
+    on_violation: |
+      ⛔ 触发红线 RL-15：编译/测试未通过
+      当前情形：<退出码 + 关键错误前 5 行>
+      自修复轮次：<N/3>
+      建议处理：<A 自修复继续 / B 升级用户>
+    self_fix_limit: 3
+
+  - id: RL-16
+    level: critical
+    title: "后一阶段输入 = 前一阶段产出"
+    trigger: "任何阶段切换时"
+    action: "AI 必须读取上游产物文件，而不是用户原话"
+    on_violation: |
+      ⛔ 触发红线 RL-16：跳过产物直接读原话
+      当前情形：当前阶段输入字段为空或写'用户原话'
+      建议处理：回上一阶段补产物文件
+
+  - id: RL-31
+    level: critical
+    title: "以落盘文件为唯一成功证据"
+    trigger: "任何'已完成'声明前"
+    action: "git log / ls / cat 验证，不依赖 stdout 自我报告"
+    on_violation: |
+      ⛔ 触发红线 RL-31：完成证据不足
+      当前情形：<stdout 显示的 vs 文件系统实际的对比>
+      建议处理：重新跑命令 + 看落盘状态
+
+  - id: RL-32
+    level: critical
+    title: "长跑命令必须有 timeout + 看门狗"
+    trigger: "任何预计 > 30 秒的命令"
+    action: "加 timeout / 中间落盘 / 进度心跳"
+    on_violation: |
+      ⛔ 触发红线 RL-32：长跑命令无超时
+      当前情形：<命令 + 预估时长>
+      建议处理：加 timeout / 改为增量执行
+
+  - id: RL-40
+    level: critical
+    title: "不可逆动作必须先点头"
+    trigger: "发邮件 / 发推 / git push / 删文件 / 外部 API 写操作 / 改线上配置"
+    action: "AI 停下，列出动作清单 + 影响范围，等用户回 'go'"
+    on_violation: |
+      ⛔ 触发红线 RL-40：不可逆动作未授权
+      当前情形：<计划执行的动作 + 影响范围>
+      建议处理：等用户确认
+
+  # ===== Standard（按阶段加载）=====
+
+  - id: RL-13
+    level: standard
+    title: "先看后写，不发明新模式"
+    trigger: "实现阶段，新增文件/函数/类时"
+    action: "先 rg 搜项目内已有的同类实现，参考风格再写"
+    on_violation: |
+      ⛔ 触发红线 RL-13：未先看现有约定
+      建议处理：先跑 <search 命令> 看现有同类代码
+
+  - id: RL-14
+    level: standard
+    title: "新函数必须有 1 个示例调用或单元测试"
+    trigger: "实现阶段，任何新增 export 函数"
+    action: "在同文件加 <example/test>，禁止裸函数"
+    on_violation: |
+      ⛔ 触发红线 RL-14：新函数无示例/测试
+      建议处理：在同包补 <_test.go / test_xxx.py / *.spec.ts>
+
+  - id: RL-30
+    level: standard
+    title: "视觉类改动必须 ui_alignment_spec.md"
+    trigger: "任何 UI/视觉类改动"
+    action: "列 N 个关键差异点 + 跑比对，0 未对齐才 PASS"
+    on_violation: |
+      ⛔ 触发红线 RL-30：UI 未对齐项 ≥ 1
+      当前情形：<未对齐项清单>
+      建议处理：回实现阶段修
+
+  - id: RL-50
+    level: standard
+    title: "敏感字段不许进 prompt / log"
+    trigger: "任何含 token / 密钥 / 用户隐私的代码路径"
+    action: "用 env var 引用，禁止明文进 prompt 或日志输出"
+    on_violation: |
+      ⛔ 触发红线 RL-50：检测到敏感字段
+      当前情形：<在哪一行>
+      建议处理：替换为 env var 引用
+
+  - id: RL-60
+    level: standard
+    title: "配置文件改动必须 schema 验证"
+    trigger: "任何 .yaml / .json / .toml 改动"
+    action: "改完跑 schema 校验或 schema 推导脚本，看退出码"
+    on_violation: |
+      ⛔ 触发红线 RL-60：配置格式错
+      建议处理：跑 <lint/validate 指令>，按错误修
+
+# ===== Agent 启动时该加载哪些 =====
+# critical 全量加载，standard 按当前阶段加载，加载规则可被项目覆写
+
+load_policy:
+  on_session_start: [RL-15, RL-16, RL-31, RL-32, RL-40]
+  on_stage_enter:
+    plan: [RL-13]
+    implement: [RL-13, RL-14, RL-50, RL-60]
+    verify: [RL-15, RL-30]
+    deliver: [RL-31, RL-40]
+    publish: [RL-40]
+
+# ===== 触发记录（可选）=====
+# 维护一份历史，看哪些红线反复触发 → 反推出流程/约定的漏洞
+
+trigger_log:
+  - timestamp: "YYYY-MM-DD HH:MM"
+    red_line_id: "RL-15"
+    context: "<一句话描述>"
+    resolution: "A 自修复 / B 升级用户 / 1 轮修复"
+
+# ===== 维护说明 =====
+# 1. 添加新红线：填 id + level + trigger + on_violation，pattern 必须明确
+# 2. 修改违规报告：用 on_violation 字段，禁止让 AI 自由发挥汇报内容
+# 3. 禁用红线：保留 id + enabled: false，不要删除（保留历史可追溯）
+# 4. 每周扫一次 trigger_log，看哪些红线反复触发 → 反思是流程问题还是红线问题
