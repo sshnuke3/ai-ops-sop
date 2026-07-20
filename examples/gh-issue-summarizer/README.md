@@ -104,6 +104,21 @@ gh-issue-summarizer/
 
 > **不要原样照搬配置和 API key**——这是示例项目，不连任何真实凭证。
 
+### 关于 `configs/*.yaml.example` vs `configs/*.yaml`
+
+本仓库存的是 schema 模板（`*.yaml.example`），不传 git 的真实配置是 `*.yaml`。
+
+文档里写「改 `configs/repos.yaml`」意思是「改你真项目里的真实配置文件」——
+使用流程：
+
+```
+1. cp configs/repos.yaml.example configs/repos.yaml
+2. 按需编辑 configs/repos.yaml
+3. configs/repos.yaml 加入 .gitignore（加进 examples 项目里那五份 “configs/*.yaml” 是不进 git 的）
+```
+
+不要把 `*.yaml.example` 当成「用得着的文件」——它的唯一职责是当成 schema 模板让真实配置从哪里复制。
+
 ---
 
 **版本**：v0.1（example 第一版 · 与 SOP v0.1 配套）

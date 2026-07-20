@@ -1,8 +1,38 @@
 # AI 长任务协作 SOP（通用版）
 
+> **版本**：v0.5.0（2026-07-21）｜**许可证**：MIT（见 [LICENSE](./LICENSE)）
+> **状态**：⚠️ **工作进度版**（0.5.x）—— API 不保证稳定，但 docs/examples 不破坏可读性
+> **Changelog**：[CHANGELOG.md](./CHANGELOG.md)
+
 > **适用对象**：用 AI Agent / LLM 跑「3 步以上长任务」的个人开发者和 5 人以下小团队。
 > **不适用**：纯聊天问答、一次性脚本、C 端情感类 AI 应用。
 > **目标读者**：在用 Claude / GPT / 国产大模型做事情，但总觉得"AI 时灵时不灵、超长任务跑一半卡了、上下文撑爆"的人。
+
+---
+
+## ⚠️ 0️⃣ 警告与状态
+
+### 这是工作进度版
+
+本仓库当前 **v0.5.0**，按 [Semantic Versioning](https://semver.org/lang/zh-CN/) 惯例 = 仍在开发，可能会有不向后兼容的变更：
+
+- ✅ **可用件**：5 份模板 + 1 完整示例项目（gh-issue-summarizer）+ 6 个命令入口
+- ⚠️ **demo 友好件**：`examples/gh-issue-summarizer/` 的 `commands/Makefile` 里部分 target 是 demo 级（仅打印示意，不真调 API）—— **拷走到自己项目时需补实**
+- ❌ **未项**：LICENSE/CHANGELOG/CONTRIBUTING 完备、真心能跑的 examples、连接真实服务端的 mock server
+
+### 拷走本仓库前的 3 件必读
+
+1. **去掉 demo 标记** —— 真实项目里 `if [ -f go.mod ]; then ... else ⚠️ skip; fi` 这种 demo 友好分支需删除
+2. **补实 examples 命令** —— `make doctor` / `make validate-config` 在真实项目里要写真函数，不只 `echo`
+3. **重新生成本项目的 `cmd/` Go 代码** —— examples 仓不包含真代码（仅 `Makefile` + `commands/scripts/run-once-dry.sh`）
+
+### 另读建议
+
+- 上手实践 **先看** `## 0️⃣ 30 分钟扪走（最小启动）` 这一节
+- 看完整项目 **打开** [`examples/gh-issue-summarizer/`](./examples/gh-issue-summarizer/)
+- 走完整套 **跳** 到 [`CHANGELOG.md`](./CHANGELOG.md) 看 v0.1 → v0.5 这五版怎么从「文档」走到「教学示例」
+
+---
 
 ---
 
