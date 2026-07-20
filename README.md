@@ -367,6 +367,22 @@ red_lines:
 
 ---
 
+## 📚 延伸阅读
+
+本 SOP 讲"怎么跑"，以下资源讲"为什么这样跑"——读者按兴趣跳读：
+
+| 资源 | 视角 | 与本 SOP 的对应 |
+|---|---|---|
+| [bojieli/ai-agent-book](https://github.com/bojieli/ai-agent-book) | 《深入理解 AI Agent》（李博杰，v1.2）| 全书核心公式 `Agent = LLM + 上下文 + 工具 + Harness`，**Harness 工程**与本 SOP 全向呼应 |
+| ↳ ch2 上下文工程 | KV Cache / Skills 渐进披露 / 上下文压缩 | SOP §3 五步定位法 + `red_lines.yaml` 的 `load_policy.on_stage_enter`  |
+| ↳ ch6 Agent 评估 | 评估 3 层（环境/方法/决策）| SOP §5 验证双闸门 |
+| ↳ ch7 模型后训练 | Pre-training → SFT → RL三阶段，"数据和环境比算法更重要" | SOP §7 红线 + §5 验证是为项目补 Harness，不是补模型 |
+| ↳ ch8 自我进化 | 三种学习范式边界（业务规则=上下文 / 语言啰嗦=后训练 / PPT 风格=外部化）| SOP §8 沉淀 + §10 “今天 3 件事” 都是外部化学习 |
+
+> **互补关系**：本 SOP 教"怎么跑"（实践 / Harness），《深入理解 AI Agent》教"为什么这样跑"（原理 / 模型体系）。
+
+---
+
 ## 📦 仓库结构
 
 ```

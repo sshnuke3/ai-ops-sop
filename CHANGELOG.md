@@ -11,6 +11,12 @@
 - 真能跑的 examples —— 引入 mock server 让 `make doctor` / `make run-once-dry` 在没有真实凭证情况下也能跑通
 - CONTRIBUTING.md：贡献指南（如何提 PR、如何报 issue）
 
+### Added (post-v0.6.0, not versioned yet)
+
+- 主 README 加“📚 延伸阅读”段 · 指向 bojieli/ai-agent-book · 列出与本 SOP 对应的 4 章映射
+  - 该变更本应记为 v0.7.0，依赖主人评审后在下次 release 时版本化
+  - 背景：主人 2026-07-21 读了《深入理解 AI Agent》 后追加
+
 ## [0.5.0] - 2026-07-21
 
 ### Added
