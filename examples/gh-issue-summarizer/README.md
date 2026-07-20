@@ -33,6 +33,11 @@ gh-issue-summarizer/
     ├── repos.yaml.example
     ├── llm.yaml.example
     └── notion.yaml.example
+├── prompts/                   ← LLM prompt 资产（含版本历史与 hash sidecar）
+│   ├── README.md                （prompt 版本管理说明）
+│   ├── summary_v3.txt           （当前主用 prompt）
+│   ├── summary_v3.txt.sha256   （hash sidecar，sha256sum -c 验证）
+│   └── summary_v2.txt           （已弃用 — DEP-N 反例）
 ```
 
 每份文件都**完全填好**，且带**"为什么这样填"的设计注释**——读完会知道 SOP 的每条规则是怎么落到具体文件里的。

@@ -143,6 +143,13 @@ main.RunOnce(repos) [每个 repo 一遍]
   - 原因：单纯落地 markdown 用户读得少
   - 影响：内部包 +1（notion writer）；spec.md §2 调用链新增 writer
   - 影响范围：run 主入口加 Notion 配置加载，ranker/fetcher 不动
+- 2026-07-21 · ITER-2.5 · prompt v2 迁 v3（spec §"不变式 2" 完备）
+  - 原因：v2 在 20 次跑里出现 5 类失败（详细调查见 prompts/summary_v2.txt 头注释）
+  - 影响：prompts/summary_v3.txt（新）+ prompts/summary_v2.txt（DEP-N 保留）+ summary_v3.txt.sha256
+  - 影响范围：summarizer 加载 prompt 逻辑不变；configs/llm.yaml.example prompt_path 已指向 v3
+- 2026-07-19 · DEP-1 · 弃用 summary_v2.txt
+  - 原因：v3 上线后 v2 被取代；保留作为"为什么 v3 那样写"反例
+  - 影响：summarizer 不再加载 v2；configs/llm.yaml.example prompt_path 仍指向 v3
 - 2026-07-20 · BUG-3 · fetcher 限流不报错
   - 原因：原代码吞掉 `X-RateLimit-Remaining=0` 响应
   - 修复：加显式 error + warn 日志 + 优雅退出部分结果
