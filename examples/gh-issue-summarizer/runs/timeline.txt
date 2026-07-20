@@ -1,0 +1,48 @@
+# gh-issue-summarizer 时间线样本
+#
+# 这是 runs/timeline.txt 在示例项目里的填法示范。
+# 真实项目里这一文件由 run 主流程每次追加，AI / 维护者不再手写。
+# 但**第一次**写它时，本文件里所有的事件都需要被某次 commit 触发"真实发生过"。
+#
+# 时间线 = SOP §6 三件套之"会话内时间线"
+# 三类事件：
+#   start        新一次运行的起点
+#   human-correction  人工干预（含报错、要求改文案、改字段等）
+#   commit       不可逆动作完成（含 git commit / Notion 写入 / LLM 调用）
+
+# === 时间线字段规约 ===
+# 事件格式：<时间> <类型> <一句话描述> [commit-hash]
+# 时间粒度：HH:MM:SS（不必精确到毫秒）
+# 倒序：最新在最上面（最新事件先让人看到）
+
+# === v1.2 (2026-07-21) — 接入 Notion 推送 ===
+2026-07-21 14:32:11 commit  ITER-3 a3f8e21 — "feat: 接入 Notion 推送" [a3f8e21]
+2026-07-21 14:28:45 human-correction  维护者在 HK-3 阶段拍板 "go" — 进入 Notion 推送
+2026-07-21 14:25:30 start  v1.2 阶段 5 启动（writer.NotionClient）
+2026-07-21 14:18:02 human-correction  AI 报告 LLM est_cost=¥4.7 — 维护者确认 "go"
+2026-07-21 14:15:17 start  v1.2 阶段 4 启动（summarizer LLM 调用）
+2026-07-21 14:08:55 commit  REV-2 7e92c10 — "refactor: 提取 Notion 字段映射为 YAML" [7e92c10]
+
+# === v1.1 (2026-07-19) — bug 修复套 ===
+2026-07-19 22:18:03 commit  BUG-2 fix — "summarizer: prompt_hash 持久化到 Notion" [bb93c44]
+2026-07-19 22:14:11 human-correction  维护者发现 LLM 输出变了但 Notion 没记录 prompt 版本 — 触发 RL-50 检查 → 发现是 BUG-2
+2026-07-19 21:55:27 commit  BUG-1 fix — "ranker: 加 tiebreaker 字段 + 单测" [bb93c44]
+2026-07-19 21:48:09 human-correction  AI 测试发现"comment 数相同的两条 issue 排序不稳定" — 触发 A 分诊
+2026-07-19 21:30:44 start  v1.1 bug 修复阶段启动
+2026-07-19 21:25:10 commit  REV-1 e4a1cd3 — "chore: 升 go-github v60 → v62" [e4a1cd3]
+
+# === v1.0 (2026-07-15) — 立项 + 骨架 ===
+2026-07-15 18:42:55 commit  INIT-1 2d4b9ae — "feat: 立项 + 骨架（fetcher + ranker + 本地 markdown）" [2d4b9ae]
+2026-07-15 18:30:00 human-correction  维护者在 HK-0 确认"先跑每周 cron，不要手动 UI" — 写入 spec §1.2
+2026-07-15 18:15:22 start  v1.0 立项会议，copy templates/ 准备 PROJECT_WIKI/overview.md
+
+# === 维护说明 ===
+# 1. **每次 commit 后**追加一行（CI hook 自动加，或人工加）
+# 2. human-correction 永远写明"维护者看到了什么、决定改什么"——便于半年后回溯决策
+# 3. start 是**任务级别**的起点，不是会话级别——同一会话多个任务会写多行
+# 4. 倒序排列（最新在最上）——vim/grep 时 "?" 反向搜最近事件更省时间
+
+# === 本 timeline.txt 示例特意展示的 3 件事 ===
+# 1. 三类事件齐备（start / human-correction / commit）—— SOP §6 要求
+# 2. human-correction 行都写明"看到 + 改什么"——半年后回看能复现当时思路
+# 3. commit 行带 commit-hash 短码——便于 `git log --grep` 反查

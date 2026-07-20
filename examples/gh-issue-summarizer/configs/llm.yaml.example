@@ -1,0 +1,24 @@
+# gh-issue-summarizer LLM 配置示例
+# 真实凭证不走这里——走环境变量 LLM_API_KEY
+
+# LLM 客户端设置
+model: "gpt-4o-mini"
+endpoint: "https://api.openai.com/v1"
+# prompt 文件路径（实现见 prompts/summary_v3.txt）
+prompt_path: "prompts/summary_v3.txt"
+# 单次运行硬上限 token（触发 RL-PRJ-1）
+max_total_tokens_per_run: 50000
+# 单 issue 摘要最大 token
+max_tokens_per_summary: 256
+# 温度——必须 0（spec §3 不变式 2）
+temperature: 0
+
+# 限速
+max_concurrent: 2
+requests_per_second: 2
+
+# === 配置文件填法注释 ===
+# 1. model 用 mini 系列控制成本——按 token 计费不容挥霍
+# 2. prompt_path 版本化——升 prompt 必须升数字（v3 → v4），不许覆盖
+# 3. max_total_tokens 触发 RL-PRJ-1——这里是 50000 tokens ≈ ¥0.7
+# 4. temperature 永远是 0——可重放原则

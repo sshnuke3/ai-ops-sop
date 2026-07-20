@@ -1,0 +1,256 @@
+# gh-issue-summarizer red_lines.yaml
+# 跨 3 工具项目的标准红线：启用 5 条 + 新增 2 条 + 禁用 2 条 + 跨工具专属 1 条
+# 模板来源：../../templates/red_lines.yaml
+# 抄走提示：每条 disabled: true 表示本项目不用，但保留作为"为什么不用"的文档
+# 每条 rl_* 字段都是"为什么这样选"的填法注释
+
+meta:
+  version: "0.1"
+  description: "gh-issue-summarizer 的红线配置——跨 GitHub/LLM/Notion 三工具"
+  owner: "<name>"
+  last_updated: "2026-07-21"
+  sop_source: "../../templates/red_lines.yaml"
+
+# === 字段：red_lines 数组 ===
+# 【填法】本项目启用 6 条，禁用 3 条，新增强化 2 条。
+# 【为什么这样选】本项目不是软件工程 IDE——AI 写错"删文件"或"伪造 log"的损失比传统代码更大
+# （跨工具一旦错，重新跑成本高 + LLM/Notion 调用要花钱）→ 红线偏严。
+
+red_lines:
+
+  # ========== 启用的标准红线（来自模板） ==========
+
+  # === RL-15：编译/测试必须退出码 0（启用）===
+  # 【为什么启用】本项目有 LLM 调用的"隐式测试"——Notion 写入是真实的 HTTP，必须测过才算完成
+  - id: RL-15
+    level: critical
+    enabled: true
+    title: "编译/测试必须退出码 0"
+    trigger: "任何'实现完成'声明前"
+    action: "自动跑 `go test ./...` + `go build`，以退出码 0 为唯一判据"
+    on_violation: |
+      ⛔ 触发红线 RL-15：编译/测试未通过
+      当前情形：<退出码 + 关键错误前 5 行>
+      自修复轮次：<N/3>
+      建议处理：<A 自修复继续 / B 升级用户>
+    self_fix_limit: 3
+
+  # === RL-16：后一阶段输入 = 前一阶段产出（启用）===
+  # 【为什么启用】本项目跨 3 工具，最容易 AI 偷懒"凭印象传 issue 数据"。
+  - id: RL-16
+    level: critical
+    enabled: true
+    title: "后一阶段输入 = 前一阶段产出"
+    trigger: "任何阶段切换时"
+    action: "AI 必须读取上游产物文件（issues.json / scored.json / summaries.json），不允许重新理解用户原话"
+    on_violation: |
+      ⛔ 触发红线 RL-16：跳过产物直接读原话
+      当前情形：当前阶段输入字段为空或写'用户原话'
+      建议处理：回上一阶段补产物文件
+    project_input_files:
+      stage2: "issues.json"
+      stage3: "scored.json"
+      stage4: "summaries.json"
+      # === stage 字段为什么这么写 ===
+      # 【填法】每个 stage 标明上游产物路径——这是具体的"前一阶段产出"。
+      # 【为什么这样填】比抽象的"前一阶段"更可操作；AI 看到字段就懂该读哪个文件。
+
+  # === RL-31：落盘文件为唯一成功证据（启用）===
+  # 【为什么启用】本项目涉及外部 API——AI 报告"已写到 Notion"不算，必须有 Notion API 响应 + 本地 run.log。
+  - id: RL-31
+    level: critical
+    enabled: true
+    title: "以落盘文件为唯一成功证据"
+    trigger: "任何'已完成'声明前"
+    action: |
+      - 单次运行成功：必须 `runs/<date>/run.log` 含 "OK: wrote N issues" + Notion API 响应 200
+      - 任何阶段：必须读 `runs/<date>/<stage>.json` 落到磁盘，不依赖 stdout
+    on_violation: |
+      ⛔ 触发红线 RL-31：完成证据不足
+      当前情形：<stdout 显示的 vs 文件系统实际的对比>
+      建议处理：重新跑命令 + 看落盘状态
+
+  # === RL-32：长跑命令必须有 timeout + 看门狗（启用）===
+  # 【为什么启用】本项目 max 时长是 LLM × 10 次 + Notion × 10 次 ~ 30 秒，但 GitHub API 假死可能 10 分钟。
+  - id: RL-32
+    level: critical
+    enabled: true
+    title: "长跑命令必须有 timeout + 看门狗"
+    trigger: "任何预计 > 30 秒的命令"
+    action: "cron 加 `timeout 600`；watchdog 每 60s 写一次 `runs/<date>/heartbeat.txt`"
+    on_violation: |
+      ⛔ 触发红线 RL-32：长跑命令无超时
+      当前情形：<命令 + 预估时长>
+      建议处理：加 timeout / 改为增量执行
+
+  # === RL-40：不可逆动作必须先点头（启用）===
+  # 【为什么启用】本项目对外发送 ≠ 发邮件，但 Notion 数据库写入也算"不可逆"——写错数据库要重发。
+  # === 这一条是本项目特别强调的 ===
+  # 【为什么这样写】比 SOP 默认的"发邮件"更宽——任何外部 API 写都算。
+  - id: RL-40
+    level: critical
+    enabled: true
+    title: "不可逆动作必须先点头"
+    trigger: |
+      不可逆动作清单（本项目专属）：
+      - 写入 Notion 数据库
+      - 触发 LLM API（按 token 计费）
+      - 切换 production config
+      - 任何包含 rm / DROP / TRUNCATE 的命令
+    action: "AI 停下，列出动作清单 + 影响范围，等用户回 'go'"
+    on_violation: |
+      ⛔ 触发红线 RL-40：不可逆动作未授权
+      当前情形：<计划执行的动作 + 影响范围>
+      建议处理：等用户确认
+
+  # === RL-50：敏感字段不许进 prompt / log（启用）===
+  # 【为什么启用】跨工具项目最容易泄漏——GitHub issue body 可能含私人信息，LLM 一调就送出去了。
+  - id: RL-50
+    level: standard
+    enabled: true
+    title: "敏感字段不许进 prompt / log"
+    trigger: "任何将 issue body / comment 内容传给 LLM 的代码路径"
+    action: |
+      - issue body 里检测到 email / phone / token 模式的字符串 → 替换为 `<REDACTED>`
+      - redaction 函数: `internal/redact/redact.go` 测试覆盖率必须 100%
+      - log 输出禁止打印完整 body，仅保留 `len(body)` 和 `issue_id`
+    on_violation: |
+      ⛔ 触发红线 RL-50：检测到敏感字段
+      当前情形：<在哪一行>
+      建议处理：替换为 redact 函数
+
+  # ========== 新增的 2 条（本项目专属） ==========
+
+  # === RL-PRJ-1（本项目新增）：LLM 调用必须成本预估 ===
+  # 【为什么新增】SOP 标准模板里没有这条——LLM 是按 token 计费的，跨工具项目必须加。
+  # 【触发场景】准备调 summarizer 之前必须算"本次预估 ¥X，Y 个 issue"
+  - id: RL-PRJ-1
+    level: critical
+    enabled: true
+    title: "LLM 调用前必须估算成本"
+    trigger: "summarizer.Summarize() 调用前"
+    action: |
+      - 计算 `est_tokens = sum(issue.body tokens) + overhead`
+      - 计算 `est_cost = est_tokens * price_per_1k / 1000`
+      - 若 est_cost > ¥5 → 停下，让用户确认
+    on_violation: |
+      ⛔ 触发红线 RL-PRJ-1：LLM 成本预估缺失
+      当前情形：<est_cost / est_tokens>
+      建议处理：跑 dry-run 估算 + 用户拍板
+
+  # === RL-PRJ-2（本项目新增）：Notion API 必须限速 ===
+  # 【为什么新增】SOP 标准模板里没有这条——跨工具 API 不限速就是 ban。
+  - id: RL-PRJ-2
+    level: standard
+    enabled: true
+    title: "跨工具 API 调用必须限速"
+    trigger: "writer.Write() 调用前"
+    action: "用 `golang.org/x/time/rate.Limiter`，硬上限 2 req/s（Notion 官方 3 req/s）"
+    on_violation: |
+      ⛔ 触发红线 RL-PRJ-2：未限速调用 Notion API
+      建议处理：加 rate.Limiter + 重试 backoff
+
+  # ========== 禁用的 3 条（保留作历史） ==========
+
+  # === RL-13：先看后写不发明新模式（禁用）===
+  # 【为什么禁用】本项目跨工具没有强约定——每次都是新工具不强求"模仿已有"。
+  # 【保留价值】如果未来 fetcher 加内部模式后再启用。
+  - id: RL-13
+    level: standard
+    enabled: false
+    disabled_reason: "跨工具项目里不同 API 风格差异大；只在同模块内强制"
+    title: "先看后写，不发明新模式"
+    trigger: "实现阶段，新增文件/函数/类时"
+    action: "先 rg 搜项目内已有的同类实现，参考风格再写"
+    on_violation: |
+      ⛔ 触发红线 RL-13：未先看现有约定
+      建议处理：先跑 <search 命令> 看现有同类代码
+
+  # === RL-14：新函数必须有测试（禁用）===
+  # 【为什么禁用】跨工具项目里 LLM 调用的"测试"本身也花钱——强制每次都写测试不现实。
+  # 【妥协】改为"critical 模块（fetcher/writer）必须测试，summarizer 允许 mock"
+  - id: RL-14
+    level: standard
+    enabled: false
+    disabled_reason: "跨工具 LLM 调用的测试本身要花钱，强制全量不现实；改为 critical 模块必须"
+    title: "新函数必须有 1 个示例调用或单元测试"
+    trigger: "实现阶段，任何新增 export 函数"
+    action: "在同文件加 <example/test>，禁止裸函数"
+    on_violation: |
+      ⛔ 触发红线 RL-14：新函数无示例/测试
+      建议处理：在同包补 <_test.go / test_xxx.py / *.spec.ts>
+
+  # === RL-30：视觉类改动必须 ui_alignment_spec.md（禁用）===
+  # 【为什么禁用】本项目无 UI，纯后端命令行——这条不适用。
+  # 【保留价值】示例作用：未来如果做 Notion UI 再启用。
+  - id: RL-30
+    level: standard
+    enabled: false
+    disabled_reason: "本项目纯 CLI/后端，无视觉类改动"
+    title: "视觉类改动必须 ui_alignment_spec.md"
+    trigger: "任何 UI/视觉类改动"
+    action: "列 N 个关键差异点 + 跑比对，0 未对齐才 PASS"
+    on_violation: |
+      ⛔ 触发红线 RL-30：UI 未对齐项 ≥ 1
+      当前情形：<未对齐项清单>
+      建议处理：回实现阶段修
+
+  # === RL-60：配置文件改动必须 schema 验证（启用）===
+  # 【为什么启用】本项目 3 套 yaml 配置，配置错误 = 运行时崩。
+  - id: RL-60
+    level: standard
+    enabled: true
+    title: "配置文件改动必须 schema 验证"
+    trigger: "任何 configs/*.yaml 改动"
+    action: "改完跑 `go run ./cmd/config-validator`，看退出码"
+    on_violation: |
+      ⛔ 触发红线 RL-60：配置格式错
+      建议处理：跑 <lint/validate 指令>，按错误修
+
+# === 字段：load_policy ===
+# 【填法】Agent 启动时加载 critical；按阶段加载 standard。
+# 【为什么这样填】本项目的 critical 比 SOP 默认多 1 条（RL-PRJ-1 LLM 成本）。
+
+load_policy:
+  on_session_start: [RL-15, RL-16, RL-31, RL-32, RL-40, RL-PRJ-1]
+  on_stage_enter:
+    config: [RL-60, RL-50]
+    fetch: [RL-13, RL-50]   # RL-13 实际禁用，但保留表明意图
+    rank: []
+    summarize: [RL-PRJ-1, RL-50]
+    write: [RL-PRJ-2, RL-31]
+    fallback: [RL-31, RL-40]
+    publish: [RL-40]
+
+# === 字段：trigger_log ===
+# 【填法】维护一份历史——哪些红线反复触发 = 哪些流程有漏洞。
+# 【为什么这样填】比"修一次红线"更有效的是"看哪些红线反复触发"=反推流程问题。
+
+trigger_log:
+  - timestamp: "2026-07-20 09:01:03"
+    red_line_id: "RL-PRJ-2"
+    context: "首次跑 Notion 推送未限速，触发 429"
+    resolution: "加 rate.Limiter + backoff"
+
+  - timestamp: "2026-07-19 22:14:11"
+    red_line_id: "RL-50"
+    context: "LLM 转发 issue body 含 email"
+    resolution: "加 redact 函数，下个 cron 自动覆盖"
+
+  - timestamp: "2026-07-21 14:02:55"
+    red_line_id: "RL-16"
+    context: "summarizer 直接读用户原话没读 fetcher 产物"
+    resolution: "回 ranker 阶段补 scored.json"
+
+# === 维护说明 ===
+# 【填法】这个项目要扩红线 → 加 id: RL-PRJ-N；禁用别删，加 enabled: false
+# 1. 添加新红线：填 id + level + enabled: true + trigger + on_violation，pattern 必须明确
+# 2. 修改违规报告：用 on_violation 字段，禁止让 AI 自由发挥汇报内容
+# 3. 禁用红线：enabled: false + disabled_reason，保留历史可追溯
+# 4. 每周扫 trigger_log，看哪些红线反复触发 → 反思流程
+
+# === 本 red_lines.yaml 示例特意展示的 4 件事 ===
+# 1. 启用 6 条而不是全启用——按项目实际威胁面裁剪
+# 2. 新增 2 条项目专属（LLM 成本 / API 限速）—— SOP 标准模板里没有这两条
+# 3. 禁用 3 条保留 + 给禁用原因——保留历史可追溯
+# 4. trigger_log 真实记录 3 条已触发事件——示范"维护一份历史"的具体样子

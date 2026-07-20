@@ -341,16 +341,28 @@ red_lines:
 
 ```
 ai-ops-sop/
-├── README.md                     ← 你正在读的
-├── templates/                    ← 抄走即用的 5 份模板
-│   ├── task-output-spec.md       ← 1️⃣ 任务产物清单（30s 抄走）
-│   ├── overview.md               ← 2️⃣ 项目总览 L1（≤5KB）
-│   ├── failure-triage.md         ← 3️⃣ 失败分诊决策树
-│   ├── red_lines.yaml            ← 4️⃣ 红线系统 YAML
-│   ├── tech-spec.md              ← 5️⃣ 项目总规文档
-│   └── hard-checkpoints.md       ← 6️⃣ 硬关卡清单
-└── examples/                     ← 填好的例子（可选参考）
+├── README.md                          ← 你正在读的
+├── templates/                         ← 抄走即用的 6 份模板
+│   ├── task-output-spec.md            ← 1️⃣ 任务产物清单（30s 抄走）
+│   ├── overview.md                    ← 2️⃣ 项目总览 L1（≤5KB）
+│   ├── failure-triage.md              ← 3️⃣ 失败分诊决策树
+│   ├── red_lines.yaml                 ← 4️⃣ 红线系统 YAML
+│   ├── tech-spec.md                   ← 5️⃣ 项目总规文档
+│   └── hard-checkpoints.md            ← 6️⃣ 硬关卡清单
+└── examples/
+    └── gh-issue-summarizer/           ← 跨 3 工具的完整示例项目
+        ├── README.md                    （项目自己的入口）
+        ├── PROJECT_WIKI/overview.md     （≤ 5KB L1 总览 · 模板 2 填好）
+        ├── docs/spec.md                 （项目总规 §0-§8 · 模板 5 填好）
+        ├── red_lines.yaml               （启用 6 + 新增 2 + 禁用 3 · 模板 4 填好）
+        ├── tasks/task-001-weekly-run.md （7 阶段产物清单 · 模板 1 填好）
+        ├── runs/timeline.txt            （3 类事件样本 · SOP §6 填好）
+        └── configs/*.yaml.example       （项目运行所需配置，不属 SOP 范围）
 ```
+
+> **examples/gh-issue-summarizer/** 是本 SOP 的"完整端到端示例"——
+> 把 5 套模板串在 1 个真实小项目里（GitHub API + LLM API + Notion API 跨 3 工具）。
+> 每份文件都**完整填好 + 加 "为什么这样填" 注释**，读一遍就能看到 SOP 的每条规则是怎么落到具体文件里的。
 
 | 你现在想要 | 先打开 |
 |---|---|
@@ -360,6 +372,7 @@ ai-ops-sop/
 | 给项目配红线 | `templates/red_lines.yaml` |
 | 给项目写规约 | `templates/tech-spec.md` |
 | 给 AI 加硬关卡 | `templates/hard-checkpoints.md` |
+| 看一个真实项目怎么把这些串起来 | `examples/gh-issue-summarizer/` |
 
 ---
 

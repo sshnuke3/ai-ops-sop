@@ -1,0 +1,26 @@
+# gh-issue-summarizer 仓库列表配置示例
+# 真实凭证不走这里——只放仓库清单
+#
+# schema:
+#   repos: 数组，最多 5 个（限流保护）
+#     - owner/repo: 字符串，仓库路径
+#       enabled: bool，是否启用
+#       label: 字符串（可选），在 Notion 里的分组标签
+
+repos:
+  - owner_repo: golang/go
+    enabled: true
+    label: "Go 语言"
+
+  - owner_repo: kubernetes/kubernetes
+    enabled: true
+    label: "Kubernetes"
+
+  - owner_repo: rust-lang/rust
+    enabled: false
+    label: "Rust 语言"   # 暂停：comment 太短不适合提炼
+
+# === 配置文件填法注释 ===
+# 1. 仓库列表 ≤ 5 是硬上限（限流保护），超出会启动失败
+# 2. enabled: false 跳过但保留，便于以后启用
+# 3. label 用于 Notion 分组——空字符串 = 用 owner_repo
